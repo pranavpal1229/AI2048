@@ -1,7 +1,7 @@
 import pygame
 import math
 from game_logic import GameLogic, SCORE
-
+import time
 pygame.init()
 
 FPS = 20
@@ -114,14 +114,22 @@ def main(window):
             if event.type == pygame.QUIT:
                 run = False
             elif event.type == pygame.KEYDOWN:
+                move_made = False
                 if event.key == pygame.K_LEFT:
-                    board.make_move("l")
+                    move_made = board.make_move("l")
                 elif event.key == pygame.K_RIGHT:
-                    board.make_move("r")
+                    move_made = board.make_move("r")
                 elif event.key == pygame.K_UP:
-                    board.make_move("u")
+                    move_made = board.make_move("u")
                 elif event.key == pygame.K_DOWN:
-                    board.make_move("d")
+                    move_made = board.make_move("d")
+                elif event.key == pygame.K_1:
+                    move_made = board.reset()
+                if move_made == False:
+                    print(board.get_score())
+                    pygame.display.update()  # Ensure the score is displayed before delay
+                    time.sleep(5)  # Wait for 5 seconds
+                    board.reset()
         
         # Draw the game board
         draw_board(window, board.grid)

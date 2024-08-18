@@ -25,6 +25,12 @@ class GameLogic:
         for pos in original_pos:
             self.grid[pos] = self.choose_number()
 
+    def reset(self):
+        global SCORE
+        self.grid = np.zeros((grid_size, grid_size), dtype=int)
+        SCORE = 0
+        self.new_number(k=2)
+
     # Move functions and combination functions
     def move_left(self, row):
         new_row = [tile for tile in row if tile != 0]
@@ -92,5 +98,5 @@ class GameLogic:
         if not np.array_equal(self.grid, old_board_state) and self.open_pos(self.grid) != 0:
             self.new_number()
         elif self.open_pos(self.grid) == 0:
-            print("RAN OUT OF ROOM")
+            return False
 
