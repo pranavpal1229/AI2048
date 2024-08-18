@@ -17,6 +17,8 @@ class GameLogic:
 
     def new_number(self, k = 1):
         open_positions = list(zip(*np.where(self.grid == 0)))
+        if len(open_positions) < k:
+            print("RAN OUT OF ROOM")
         original_pos = random.sample(open_positions, k)
 
         for pos in original_pos:
@@ -60,6 +62,7 @@ class GameLogic:
 # will genuinly get a cookie if you email me at pranavpal12@gmail.com
 
     def make_move(self, move):
+        old_board_state = self.grid.copy() #used to check if board state is different after move
         if move == "l":  # Move left
             for row in range(grid_size):
                 
@@ -87,18 +90,24 @@ class GameLogic:
                 new_row = self.move_right(self.grid[row])
                 new_row = self.combine_row_right(self.grid[row])
                 self.grid[row] = self.move_right(new_row)
-            self.grid = self.grid.T 
+            self.grid = self.grid.T
+        if not np.array_equal(self.grid,old_board_state):
+            self.new_number()
 #-----------------------------------------------------------------------------
+    def play(self):
+        self.new_number(k = 2)
+        while True:
+            print(self.grid)
+            cmd = input()
+            if cmd == "q":
+                break
+            self.make_move(cmd)
 
+
+
+
+
+#------------------------------------------------------------------------------
 if __name__ == '__main__':
     game = GameLogic()
-    game.new_number(8)
-    print(game)
-    game.make_move(move = "u")
-    print(game)
-    game.make_move(move = "l")
-    print(game)
-    game.make_move(move = "d")
-    print(game)
-    game.make_move(move = "r")
-    print(game)
+    game.play()
