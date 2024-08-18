@@ -16,10 +16,11 @@ class GameLogic:
     def choose_number(self):
         return int(random.choices(self.choices, self.probabilities)[0])
 
+    def open_pos(self, grid):
+        return len(list(zip(*np.where(grid == 0))))
+
     def new_number(self, k=1):
         open_positions = list(zip(*np.where(self.grid == 0)))
-        if len(open_positions) < k:
-            print("RAN OUT OF ROOM")
         original_pos = random.sample(open_positions, k)
         for pos in original_pos:
             self.grid[pos] = self.choose_number()
@@ -83,6 +84,8 @@ class GameLogic:
                 new_row = self.combine_row_right(new_row)
                 self.grid[row] = self.move_right(new_row)
             self.grid = self.grid.T
-        if not np.array_equal(self.grid, old_board_state):
+        if not np.array_equal(self.grid, old_board_state) and self.open_pos(self.grid) != 0:
             self.new_number()
+        elif self.open_pos(self.grid) == 0:
+            print("RAN OUT OF ROOM")
 

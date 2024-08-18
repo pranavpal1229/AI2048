@@ -81,6 +81,8 @@ def draw_board(window, grid):
                 tile.draw(window)
     pygame.display.update()
 
+
+
 def main(window):
     clock = pygame.time.Clock()
     run = True
