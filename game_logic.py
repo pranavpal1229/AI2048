@@ -4,7 +4,7 @@ grid_size = 4
 
 class GameLogic:
     def __init__(self):
-        self.grid = np.zeros((grid_size , grid_size))
+        self.grid = np.zeros((grid_size, grid_size ))       
         self.choices = [2,4]
         self.probabilities = [0.9, 0.1]
 
@@ -43,7 +43,6 @@ class GameLogic:
 #------------------------------------------------------------------------------
     def combine_row_right(self, row):
         m = len(row)
-        final_row = []
         for i in range(m - 1, -1, -1):
             if row[i] != 0 and row[i - 1] == row[i]:
                 row[i] *= 2
@@ -51,15 +50,11 @@ class GameLogic:
         return row
     def combine_row_left(self, row):
         m = len(row)
-        final_row = []
         for i in range(m - 1):
-            if row[i] != 0 and row[i + 1] == row[i]: #if there are two adjacent numbers...combine them
-                final_row.append((row[i]) * 2)
-                row[i + 1] = 0 #ensures that three in a row will not combine all three
-            elif row[i] != 0:
-                final_row.append(row[i])
-        final_row += [0] * (grid_size - len(final_row))
-        return final_row
+            if row[i] != 0 and row[i + 1] == row[i]:
+                row[i] *= 2
+                row[i + 1] = 0
+        return row
 
 #it is literally 2 A.M right now...if anyone is seeing this comment you
 # will genuinly get a cookie if you email me at pranavpal12@gmail.com
@@ -77,10 +72,33 @@ class GameLogic:
                 new_row = self.combine_row_right(new_row)
                 self.grid[row] = self.move_right(new_row)
 
+        if move == "u":
+            self.grid = self.grid.T #transposed array and will retranspose at the end
+            for row in range(grid_size):
+                new_row = self.move_left(self.grid[row])
+                new_row = self.combine_row_left(new_row)
+                self.grid[row] = self.move_left(new_row)
+            self.grid = self.grid.T
+
+
+        if move == "d":
+            self.grid = self.grid.T #same as above transpose function
+            for row in range(grid_size):
+                new_row = self.move_right(self.grid[row])
+                new_row = self.combine_row_right(self.grid[row])
+                self.grid[row] = self.move_right(new_row)
+            self.grid = self.grid.T 
+#-----------------------------------------------------------------------------
 
 if __name__ == '__main__':
     game = GameLogic()
     game.new_number(8)
+    print(game)
+    game.make_move(move = "u")
+    print(game)
+    game.make_move(move = "l")
+    print(game)
+    game.make_move(move = "d")
     print(game)
     game.make_move(move = "r")
     print(game)
