@@ -2,7 +2,7 @@ import numpy as np
 import random 
 
 grid_size = 4
-
+SCORE = 0
 class GameLogic:
     def __init__(self):
         self.grid = np.zeros((grid_size, grid_size), dtype=int)
@@ -41,21 +41,26 @@ class GameLogic:
         return final_row
 
     def combine_row_right(self, row):
+        global SCORE
         m = len(row)
         for i in range(m - 1, -1, -1):
             if row[i] != 0 and row[i - 1] == row[i]:
                 row[i] *= 2
+                SCORE += row[i]
                 row[i - 1] = 0
         return row
 
     def combine_row_left(self, row):
+        global SCORE
         m = len(row)
         for i in range(m - 1):
             if row[i] != 0 and row[i + 1] == row[i]:
                 row[i] *= 2
+                SCORE += row[i]
                 row[i + 1] = 0
         return row
-
+    def get_score(self):
+        return SCORE
     def make_move(self, move):
         old_board_state = self.grid.copy()
         if move == "l": 
@@ -84,6 +89,7 @@ class GameLogic:
                 new_row = self.combine_row_right(new_row)
                 self.grid[row] = self.move_right(new_row)
             self.grid = self.grid.T
+        print(self.get_score())
         if not np.array_equal(self.grid, old_board_state) and self.open_pos(self.grid) != 0:
             self.new_number()
         elif self.open_pos(self.grid) == 0:

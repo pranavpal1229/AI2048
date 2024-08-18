@@ -1,11 +1,11 @@
 import pygame
 import math
-from game_logic import GameLogic
+from game_logic import GameLogic, SCORE
 
 pygame.init()
 
 FPS = 60
-WIDTH, HEIGHT = 800, 800
+WIDTH, HEIGHT = 650, 650
 ROWS, COLS = (4, 4)
 RECT_HEIGHT = HEIGHT / COLS
 RECT_WIDTH = HEIGHT / COLS
@@ -15,7 +15,7 @@ OUTLINE_THICKNESS = 10
 BACKGROUND_COLOR = (205, 192, 180)
 FONT_COLOR = (119, 110, 101)
 
-WINDOW = pygame.display.set_mode((WIDTH, HEIGHT))
+WINDOW = pygame.display.set_mode((WIDTH, HEIGHT + 100))
 pygame.display.set_caption("2048")
 FONT = pygame.font.SysFont("comicsans", 60, bold=True)
 MOVE_VEL = 20
@@ -83,6 +83,7 @@ def draw_board(window, grid):
 
 
 
+
 def main(window):
     clock = pygame.time.Clock()
     run = True
@@ -102,9 +103,7 @@ def main(window):
                     board.make_move("u")
                 elif event.key == pygame.K_DOWN:
                     board.make_move("d")
-
         draw_board(window, board.grid)
-    
     pygame.quit()
 
 if __name__ == "__main__":
