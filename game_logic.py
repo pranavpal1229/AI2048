@@ -23,21 +23,24 @@ class GameLogic:
             self.grid[pos] = self.choose_number()
 
     def move_left(self, row):
-        new_row = [tile for tile in row if tile != 0]
-        new_row += [0] * (grid_size - len(new_row)) 
+        new_row = [tile for tile in row if tile != 0] #shifts all of the number tiles to the beginning
+        new_row += [0] * (grid_size - len(new_row))  
         return new_row
     
     def combine_row(self, row):
         m = len(row)
         final_row = []
         for i in range(m - 1):
-            if row[i] != 0 and row[i + 1] == row[i]:
+            if row[i] != 0 and row[i + 1] == row[i]: #if there are two adjacent numbers...combine them
                 final_row.append((row[i]) * 2)
-                row[i + 1] = 0
+                row[i + 1] = 0 #ensures that three in a row will not combine all three
             elif row[i] != 0:
                 final_row.append(row[i])
         final_row += [0] * (grid_size - len(final_row))
         return final_row
+
+#it is literally 2 A.M right now...if anyone is seeing this comment you
+# will genuinly get a cookie if you email me at pranavpal12@gmail.com
 
     def make_move(self, move):
         if move == "l":  # Move left
