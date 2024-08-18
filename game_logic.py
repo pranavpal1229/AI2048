@@ -22,12 +22,34 @@ class GameLogic:
         for pos in original_pos:
             self.grid[pos] = self.choose_number()
 
+
+
+
+#------------------------------------------------------------------------------
+
     def move_left(self, row):
         new_row = [tile for tile in row if tile != 0] #shifts all of the number tiles to the beginning
         new_row += [0] * (grid_size - len(new_row))  
         return new_row
     
-    def combine_row(self, row):
+    def move_right(self, row):
+        final_row = [0] * 4
+        pointer = 3 #lets me work backwards when seeing the last location of non-neg
+        for i in range(len(row) - 1, -1, -1):
+            if row[i] != 0:
+                final_row[pointer] = row[i]
+                pointer -= 1
+        return final_row
+#------------------------------------------------------------------------------
+    def combine_row_right(self, row):
+        m = len(row)
+        final_row = []
+        for i in range(m - 1, -1, -1):
+            if row[i] != 0 and row[i - 1] == row[i]:
+                row[i] *= 2
+                row[i - 1] = 0
+        return row
+    def combine_row_left(self, row):
         m = len(row)
         final_row = []
         for i in range(m - 1):
@@ -47,13 +69,18 @@ class GameLogic:
             for row in range(grid_size):
                 
                 new_row = self.move_left(self.grid[row])
-                new_row = self.combine_row(new_row)
+                new_row = self.combine_row_left(new_row)
                 self.grid[row] = self.move_left(new_row)
+        if move == "r":
+            for row in range(grid_size):
+                new_row = self.move_right(self.grid[row])
+                new_row = self.combine_row_right(new_row)
+                self.grid[row] = self.move_right(new_row)
 
 
 if __name__ == '__main__':
     game = GameLogic()
     game.new_number(8)
     print(game)
-    game.make_move(move = "l")
+    game.make_move(move = "r")
     print(game)
