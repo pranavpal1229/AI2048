@@ -89,7 +89,6 @@ class GameLogic:
                 new_row = self.combine_row_right(new_row)
                 self.grid[row] = self.move_right(new_row)
             self.grid = self.grid.T
-        print(self.get_score())
         if not np.array_equal(self.grid, old_board_state) and self.open_pos(self.grid) != 0:
             self.new_number()
         elif self.open_pos(self.grid) == 0:

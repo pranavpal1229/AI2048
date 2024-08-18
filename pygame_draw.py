@@ -4,7 +4,7 @@ from game_logic import GameLogic, SCORE
 
 pygame.init()
 
-FPS = 60
+FPS = 20
 WIDTH, HEIGHT = 650, 650
 ROWS, COLS = (4, 4)
 RECT_HEIGHT = HEIGHT / COLS
@@ -16,8 +16,11 @@ BACKGROUND_COLOR = (205, 192, 180)
 FONT_COLOR = (119, 110, 101)
 
 WINDOW = pygame.display.set_mode((WIDTH, HEIGHT + 100))
+SCREEN = pygame.Surface((WIDTH, HEIGHT + 100), pygame.SRCALPHA)
 pygame.display.set_caption("2048")
 FONT = pygame.font.SysFont("comicsans", 60, bold=True)
+FONT2 = pygame.font.SysFont("comicsans", 30, bold=True)
+
 MOVE_VEL = 20
 
 board = GameLogic()
@@ -81,12 +84,28 @@ def draw_board(window, grid):
                 tile.draw(window)
     pygame.display.update()
 
+def draw_text(text, font, color, x, y, center=False):
+    """
+    Draw text on a Pygame window.
 
-
+    Parameters:
+    - text: The string of text to be drawn.
+    - font: The Pygame font object to be used for rendering the text.
+    - color: A tuple representing the RGB color of the text.
+    - x: The x-coordinate for the text's position.
+    - y: The y-coordinate for the text's position.
+    - center: If True, the text will be centered on the given (x, y) coordinates.
+    """
+    text_surface = font.render(text, True, color)
+    if center:
+        x = x - text_surface.get_width() // 2
+        y = y - text_surface.get_height() // 2
+    WINDOW.blit(text_surface, (x, y))
 
 def main(window):
     clock = pygame.time.Clock()
     run = True
+    last_score = board.get_score()
 
     while run:
         clock.tick(FPS)
@@ -103,7 +122,25 @@ def main(window):
                     board.make_move("u")
                 elif event.key == pygame.K_DOWN:
                     board.make_move("d")
+        
+        # Draw the game board
         draw_board(window, board.grid)
+
+        # Check if the score has changed
+        current_score = board.get_score()
+            # Clear the score area
+        pygame.draw.rect(window, BACKGROUND_COLOR, (0, HEIGHT, WIDTH, 100))
+        
+        # Draw the updated score
+        draw_text(f"Score: {current_score}", FONT2, (0,0,0), WIDTH // 2, HEIGHT + 50, center=True)
+        
+        # Update the display only for the score area
+        pygame.display.update((0, HEIGHT, WIDTH, 100))
+
+
+        # Update the display for the game area
+        pygame.display.update((0, 0, WIDTH, HEIGHT))
+
     pygame.quit()
 
 if __name__ == "__main__":
