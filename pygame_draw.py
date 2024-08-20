@@ -105,7 +105,6 @@ def draw_text(text, font, color, x, y, center=False):
 def main(window):
     clock = pygame.time.Clock()
     run = True
-    last_score = board.get_score()
 
     while run:
         clock.tick(FPS)
@@ -130,23 +129,17 @@ def main(window):
                     pygame.display.update()  # Ensure the score is displayed before delay
                     time.sleep(5)  # Wait for 5 seconds
                     board.reset()
-        
-        # Draw the game board
+
         draw_board(window, board.grid)
 
-        # Check if the score has changed
         current_score = board.get_score()
-            # Clear the score area
+
         pygame.draw.rect(window, BACKGROUND_COLOR, (0, HEIGHT, WIDTH, 100))
-        
-        # Draw the updated score
+
         draw_text(f"Score: {current_score}", FONT2, (0,0,0), WIDTH // 2, HEIGHT + 50, center=True)
-        
-        # Update the display only for the score area
+
         pygame.display.update((0, HEIGHT, WIDTH, 100))
 
-
-        # Update the display for the game area
         pygame.display.update((0, 0, WIDTH, HEIGHT))
 
     pygame.quit()

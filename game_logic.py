@@ -9,6 +9,7 @@ class GameLogic:
         self.choices = [2, 4]
         self.probabilities = [0.9, 0.1]
         self.new_number(k=2)
+        self.done = False
 
     def __str__(self):
         return str(self.grid.astype(int))
@@ -25,12 +26,16 @@ class GameLogic:
         for pos in original_pos:
             self.grid[pos] = self.choose_number()
 
+    def generate_observations(self):
+        global SCORE
+        return self.done, SCORE, self.grid
+    
     def reset(self):
         global SCORE
         self.grid = np.zeros((grid_size, grid_size), dtype=int)
         SCORE = 0
         self.new_number(k=2)
-
+        return self.generate_observations()
     # Move functions and combination functions
     def move_left(self, row):
         new_row = [tile for tile in row if tile != 0]
@@ -55,7 +60,12 @@ class GameLogic:
                 SCORE += row[i]
                 row[i - 1] = 0
         return row
-
+    def generate_observations(self):
+        return [
+             self.grid.copy(),
+            self.get_score(),
+            self.done
+        ]
     def combine_row_left(self, row):
         global SCORE
         m = len(row)
@@ -98,5 +108,4 @@ class GameLogic:
         if not np.array_equal(self.grid, old_board_state) and self.open_pos(self.grid) != 0:
             self.new_number()
         elif self.open_pos(self.grid) == 0:
-            return False
-
+            self.done = True
