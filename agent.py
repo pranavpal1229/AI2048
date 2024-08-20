@@ -27,9 +27,9 @@ class Game_2048NN:
                 reward = game.make_move(move)
 
                 observations = self.generate_observations(game, move, game.done)
-        
+                observations += reward[0:3]
             # Format data for training; include observation and whether the game is over
-                population_data.append((observations, reward))
+                population_data.append((observations, reward[3]))
         population_data_np = np.array(population_data, dtype=object)
         return population_data_np
 

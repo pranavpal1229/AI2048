@@ -100,19 +100,24 @@ class GameLogic:
 
     def reward_calc(self, old_max, new_max, old_open, new_open, old_score, new_score, done):
         reward = 0
+        max_diff = new_max - old_max
         if new_max > old_max:
             reward += 100
-        if new_open < old_open:
+        if len(new_open) < len(old_open):
             reward += 25
+            open_diff = len(new_open) - len(old_open)
         else:
             reward -= 50
+            open_diff = len(new_open) - len(old_open)
         if new_score > old_score:
             reward += 2
+            score_diff = new_score - old_score
         else:
             reward -= 15
+            score_diff = new_score - old_score
         if done:
             reward -= 1000
-        return reward
+        return [max_diff, open_diff, score_diff, reward]
     def make_move(self, move):
         old_board_state = self.grid.copy()
         old_score = SCORE
