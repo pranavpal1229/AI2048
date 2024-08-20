@@ -18,25 +18,29 @@ class Game_2048NN:
                 ]
 
 
-    def initial_population(num_games=100):
+    def initial_population(self, num_games=100):
         population_data = []
         for _ in range(num_games):
             game = GameLogic()
-            for _ in range(10):
-                game.make_move("l")
-                game.make_move("u")
+            while not(game.done):
+                move = self.generate_random_move()
+                reward = game.make_move(move)
 
-                observations = game.generate_observations()
-            # Use the observations and game state to create training data
-                is_game_over = 1
+                observations = self.generate_observations(game, move, game.done)
         
             # Format data for training; include observation and whether the game is over
-                population_data.append((observations, is_game_over))
+                population_data.append((observations, reward))
     
         return population_data
 
-    def generate_observations(self, game):
-        return game.generate_observations()
+    def generate_random_move(self):
+        num = randint(0,3)
+        moves = ["l", "r", "u", "d"]
+        return moves[num]
+
+    def generate_observations(self, game, move, done):
+        grid = np.copy(game.grid)
+        return [grid, move, game.done]
 
     def model(self):
         # Define and return the neural network model
@@ -57,8 +61,8 @@ class Game_2048NN:
         self.test_model(nn_model)
 
 if __name__ == "__main__":
-    game = Game_2048NN
-    training_data = game.initial_population()
+    game = Game_2048NN()
+    training_data = game.initial_population(2)
     print(training_data)  # Or use it for your AI model
 
 

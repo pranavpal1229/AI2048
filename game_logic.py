@@ -1,5 +1,6 @@
 import numpy as np
 import random 
+import collections
 
 grid_size = 4
 SCORE = 0
@@ -16,9 +17,28 @@ class GameLogic:
 
     def choose_number(self):
         return int(random.choices(self.choices, self.probabilities)[0])
-
+    def max_square(self, grid):
+        copy_grid = np.copy(grid)
+        copy_grid = copy_grid.reshape(-1)
+        return np.max(copy_grid)
     def open_pos(self, grid):
         return len(list(zip(*np.where(grid == 0))))
+
+    def all_dif(self, grid):
+        for row in grid:
+            for i in range(len(row) - 2):
+                if row[i] == row[i + 1]:
+                    return False
+        copy_grid = np.copy(grid)
+        copy_grid = copy_grid.T
+        for col in grid:
+            for i in range(len(col) - 2):
+                if col[i] == col[i + 1]:
+                    return False
+        return True
+
+    def open_positions(self, grid):
+        return list(zip(*np.where(grid == 0)))
 
     def new_number(self, k=1):
         open_positions = list(zip(*np.where(self.grid == 0)))
@@ -77,8 +97,27 @@ class GameLogic:
         return row
     def get_score(self):
         return SCORE
+
+    def reward_calc(self, old_max, new_max, old_open, new_open, old_score, new_score, done):
+        reward = 0
+        if new_max > old_max:
+            reward += 100
+        if new_open < old_open:
+            reward += 25
+        else:
+            reward -= 50
+        if new_score > old_score:
+            reward += 2
+        else:
+            reward -= 15
+        if done:
+            reward -= 1000
+        return reward
     def make_move(self, move):
         old_board_state = self.grid.copy()
+        old_score = SCORE
+        old_max = self.max_square(self.grid)
+        old_open = self.open_positions(self.grid)
         if move == "l": 
             for row in range(grid_size):
                 new_row = self.move_left(self.grid[row])
@@ -106,6 +145,12 @@ class GameLogic:
                 self.grid[row] = self.move_right(new_row)
             self.grid = self.grid.T
         if not np.array_equal(self.grid, old_board_state) and self.open_pos(self.grid) != 0:
+            new_max = self.max_square(self.grid)
+            new_open = self.open_positions(self.grid)
             self.new_number()
-        elif self.open_pos(self.grid) == 0:
+            return self.reward_calc(old_max, new_max, old_open, new_open, old_score, SCORE, False)
+        elif self.open_pos(self.grid) == 0 and self.all_dif(self.grid):
+            new_max = self.max_square(self.grid)
+            new_open = self.open_positions(self.grid)           
             self.done = True
+            return self.reward_calc(old_max, new_max, old_open, new_open, old_score, SCORE, True)
