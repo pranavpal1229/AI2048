@@ -154,3 +154,7 @@ class GameLogic:
             new_open = self.open_positions(self.grid)           
             self.done = True
             return self.reward_calc(old_max, new_max, old_open, new_open, old_score, SCORE, True)
+        else:
+            new_max = self.max_square(self.grid)
+            new_open = self.open_positions(self.grid) 
+            return self.reward_calc(old_max, new_max, old_open, new_open, old_score, SCORE, False)

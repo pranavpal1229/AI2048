@@ -30,8 +30,8 @@ class Game_2048NN:
         
             # Format data for training; include observation and whether the game is over
                 population_data.append((observations, reward))
-    
-        return population_data
+        population_data_np = np.array(population_data, dtype=object)
+        return population_data_np
 
     def generate_random_move(self):
         num = randint(0,3)
