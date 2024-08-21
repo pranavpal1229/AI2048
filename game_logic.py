@@ -45,10 +45,6 @@ class GameLogic:
         original_pos = random.sample(open_positions, k)
         for pos in original_pos:
             self.grid[pos] = self.choose_number()
-
-    def generate_observations(self):
-        global SCORE
-        return self.done, SCORE, self.grid
     
     def reset(self):
         global SCORE

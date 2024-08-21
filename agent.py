@@ -18,10 +18,10 @@ class Game_2048NN:
         self.goal_steps = goal_steps
         self.lr = lr
         self.vectors_and_keys = [
-                ["l", 2],
-                ["r", 3],
-                ["u", 4],
-                ["d", 5]
+                ["l", 0],
+                ["r", 1],
+                ["u", 2],
+                ["d", 3]
                 ]
 
     def initial_population(self, num_games=100):
@@ -89,31 +89,50 @@ class Game_2048NN:
         rewards = np.array([x[1] for x in training_data])
 
         # Ensure the shapes are correct
-        print(f"Features shape: {features.shape}")
-        print(f"Rewards shape: {rewards.shape}")
 
         nn_model.fit(features, rewards, epochs=10, batch_size=32)
         return nn_model
 
     def test_model(self, nn_model):
         total_score = 0
-        for _ in range(self.test_games):
+        total_max_tiles = []
+        for i in range(self.test_games):
+            print(f"NEW IIIIIIIIIII LETS GOOOOO {i}")
             game = GameLogic()
             done = False
             while not done:
                 observations = self.generate_observations(game, '', game.done)
-                observations = np.append(observations, [0,0,0])
+                observations = np.append(observations, [10,10,10])
                 observations = np.array([observations])  # Add batch dimension
-                print(f"Observations shape: {observations.shape}")  # Debug print
+
                 predicted_rewards = nn_model.predict(observations)
                 action_index = np.argmax(predicted_rewards)  # Choose action with the highest predicted reward
+                predicted_rewards[0][action_index] = -10000
+                action_index2 = np.argmax(predicted_rewards)
+                predicted_rewards[0][action_index2] = -10000
+                action_index3 = np.argmax(predicted_rewards)
+                predicted_rewards[0][action_index3] = -10000
+                action_index4 = np.argmax(predicted_rewards)
+
+
                 move = self.vectors_and_keys[action_index][0]
-                
+                move2 = self.vectors_and_keys[action_index2][0]
+                move3 = self.vectors_and_keys[action_index3][0]
+                move4 = self.vectors_and_keys[action_index4][0]
+                copy_grid = np.copy(game.grid)
                 reward = game.make_move(move)
+                if np.array_equal(copy_grid, game.grid):
+                    game.make_move(move2)
+                    if np.array_equal(copy_grid, game.grid):
+                        game.make_move(move3)
+                        if np.array_equal(copy_grid, game.grid):
+                            game.make_move(move4)
                 done = game.done
-
+            max_tile = game.max_square(game.grid)
+            total_max_tiles.append(max_tile)
+            print(total_max_tiles)
             total_score += game.get_score()
-
+        
         avg_score = total_score / self.test_games
         print(f"Average Score over {self.test_games} games: {avg_score}")
     def train(self):

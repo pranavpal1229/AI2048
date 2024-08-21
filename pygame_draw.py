@@ -4,7 +4,7 @@ from game_logic import GameLogic, SCORE
 from agent import Game_2048NN
 import time
 pygame.init()
-
+import numpy as np
 FPS = 20
 WIDTH, HEIGHT = 650, 650
 ROWS, COLS = (4, 4)
@@ -107,29 +107,32 @@ def main(window):
     clock = pygame.time.Clock()
     run = True
 
+    # Initialize the AI model
+    ai_game = Game_2048NN()
+    nn_model = ai_game.model()
+    nn_model.load_weights("pygame.h5")  # Load trained weights
+
     while run:
         clock.tick(FPS)
-        
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-            elif event.type == pygame.KEYDOWN:
-                move_made = False
-                if event.key == pygame.K_LEFT:
-                    move_made = board.make_move("l")
-                elif event.key == pygame.K_RIGHT:
-                    move_made = board.make_move("r")
-                elif event.key == pygame.K_UP:
-                    move_made = board.make_move("u")
-                elif event.key == pygame.K_DOWN:
-                    move_made = board.make_move("d")
-                elif event.key == pygame.K_1:
-                    move_made = board.reset()
-                if move_made == False:
-                    print(board.get_score())
-                    pygame.display.update()  # Ensure the score is displayed before delay
-                    time.sleep(5)  # Wait for 5 seconds
-                    board.reset()
+
+        # AI decision-making
+        observations = ai_game.generate_observations(board, '', board.done)
+        observations = np.append(observations, [0, 0, 0])
+        observations = np.array([observations])  # Add batch dimension
+        predicted_rewards = nn_model.predict(observations)
+        action_index = np.argmax(predicted_rewards)
+        move = ai_game.vectors_and_keys[action_index][0]
+
+        move_made = board.make_move(move)
+        if move_made == False:
+            print(board.get_score())
+            pygame.display.update()  # Ensure the score is displayed before delay
+            time.sleep(5)  # Wait for 5 seconds
+            board.reset()
 
         draw_board(window, board.grid)
 
@@ -137,13 +140,11 @@ def main(window):
 
         pygame.draw.rect(window, BACKGROUND_COLOR, (0, HEIGHT, WIDTH, 100))
 
-        draw_text(f"Score: {current_score}", FONT2, (0,0,0), WIDTH // 2, HEIGHT + 50, center=True)
+        draw_text(f"Score: {current_score}", FONT2, (0, 0, 0), WIDTH // 2, HEIGHT + 50, center=True)
 
         pygame.display.update((0, HEIGHT, WIDTH, 100))
-
         pygame.display.update((0, 0, WIDTH, HEIGHT))
 
     pygame.quit()
-
 if __name__ == "__main__":
     main(WINDOW)
