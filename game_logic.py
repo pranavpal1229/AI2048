@@ -11,6 +11,7 @@ class GameLogic:
         self.probabilities = [0.9, 0.1]
         self.new_number(k=2)
         self.done = False
+        self.trial = 'hi'
 
     def __str__(self):
         return str(self.grid.astype(int))
