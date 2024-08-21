@@ -12,7 +12,7 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 class Game_2048NN:
-    def __init__(self, initial_games=100, test_games=2, goal_steps=100, lr=1e-2):
+    def __init__(self, initial_games=100, test_games= 100, goal_steps=100, lr=1e-2):
         self.initial_games = initial_games
         self.test_games = test_games
         self.goal_steps = goal_steps
@@ -34,7 +34,7 @@ class Game_2048NN:
 
                 observations = self.generate_observations(game, move, game.done)
                 observations = np.append(observations, reward[0:3])
-                assert(len(observations) == 21)
+                print(len(observations))
                 # Format rewards as a vector with zeroes except for the action taken
                 rewards = np.zeros(4)
                 # Find index for the action based on the move
@@ -57,25 +57,34 @@ class Game_2048NN:
 
     def generate_observations(self, game, move, done):
         grid = np.copy(game.grid)
-        moves = ["l", "r", "u", "d"]
-        ans = 0
-        done_num = 0
-        if done:
-            done_num = 1
-        for i, num in enumerate(moves):
-            if num == move:
-                ans = i
-                break
-        grid = grid.reshape(-1)  # Flatten the grid
-        grid = np.append(grid, [ans, done_num])
-
+        grid_flattened = grid.reshape(-1)
         
-        return grid  # Return as a flat NumPy array
+        # Features related to grid
+        row_sums = np.sum(grid, axis=1)  # Sum of each row
+        col_sums = np.sum(grid, axis=0)  # Sum of each column
+        empty_count = np.sum(grid == 0)  # Number of empty cells
+        
+        # Features related to the move
+        moves = ["l", "r", "u", "d"]
+        move_index = moves.index(move) if move in moves else -1
+        
+        # Adding additional features
+        features = np.concatenate([
+            grid_flattened,
+            row_sums,
+            col_sums,
+            [empty_count],
+            [move_index],
+            [1 if done else 0]
+        ])
+        
+        return features
+
 
     def model(self):
         # Define and return the neural network model
         model = Sequential([
-            tf.keras.Input(shape=(21,)),  # Input shape should match the feature size
+            tf.keras.Input(shape=(30,)),  # Input shape should match the feature size
             Dense(15, activation= 'relu'),
             Dense(5, activation= 'relu'),
             Dense(4, activation='linear')  # Assuming 4 possible actions
@@ -83,15 +92,17 @@ class Game_2048NN:
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=self.lr),
                       loss='mean_squared_error')
         return model
-
+    
     def train_model(self, training_data, nn_model):
         features = np.array([x[0] for x in training_data])
         rewards = np.array([x[1] for x in training_data])
-
-        # Ensure the shapes are correct
-
-        nn_model.fit(features, rewards, epochs=10, batch_size=32)
+        
+        # Normalize features
+        features = (features - np.mean(features, axis=0)) / np.std(features, axis=0)
+        
+        nn_model.fit(features, rewards, epochs=50, batch_size=64, validation_split=0.1)
         return nn_model
+
 
     def test_model(self, nn_model):
         total_score = 0
@@ -101,40 +112,42 @@ class Game_2048NN:
             game = GameLogic()
             done = False
             while not done:
-                observations = self.generate_observations(game, '', game.done)
-                observations = np.append(observations, [10,10,10])
-                observations = np.array([observations])  # Add batch dimension
+                observations = self.generate_observations(game, 'l', game.done)  # Use a placeholder move
+                observations = np.array([observations])  # Ensure it's a 2D array with shape (1, 30)
+                observations = np.append(observations, np.array([0,0,0]))  # Make sure this doesn't change the shape unexpectedly
+
+                # Correctly reshape observations if necessary
+                if observations.shape[0] == 30:
+                    observations = np.reshape(observations, (1, 30))  # Ensure the shape is (1, 30)
 
                 predicted_rewards = nn_model.predict(observations)
                 action_index = np.argmax(predicted_rewards)  # Choose action with the highest predicted reward
-                predicted_rewards[0][action_index] = -10000
-                action_index2 = np.argmax(predicted_rewards)
-                predicted_rewards[0][action_index2] = -10000
-                action_index3 = np.argmax(predicted_rewards)
-                predicted_rewards[0][action_index3] = -10000
-                action_index4 = np.argmax(predicted_rewards)
 
-
-                move = self.vectors_and_keys[action_index][0]
-                move2 = self.vectors_and_keys[action_index2][0]
-                move3 = self.vectors_and_keys[action_index3][0]
-                move4 = self.vectors_and_keys[action_index4][0]
+                # Generate moves based on predicted rewards
+                moves = ["l", "r", "u", "d"]
+                move = moves[action_index]
                 copy_grid = np.copy(game.grid)
                 reward = game.make_move(move)
+
                 if np.array_equal(copy_grid, game.grid):
-                    game.make_move(move2)
-                    if np.array_equal(copy_grid, game.grid):
-                        game.make_move(move3)
-                        if np.array_equal(copy_grid, game.grid):
-                            game.make_move(move4)
+                    # Try alternative moves if the chosen move has no effect
+                    available_moves = [m for m in moves if m != move]
+                    for alternative_move in available_moves:
+                        copy_grid = np.copy(game.grid)
+                        reward = game.make_move(alternative_move)
+                        if not np.array_equal(copy_grid, game.grid):
+                            break
+
                 done = game.done
             max_tile = game.max_square(game.grid)
             total_max_tiles.append(max_tile)
             print(total_max_tiles)
             total_score += game.get_score()
-        
+    
         avg_score = total_score / self.test_games
         print(f"Average Score over {self.test_games} games: {avg_score}")
+
+
     def train(self):
         training_data = self.initial_population()
         nn_model = self.model()
