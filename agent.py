@@ -60,7 +60,6 @@ class Game_2048NN:
     def generate_observations(self, game, move, done):
         grid = np.copy(game.grid)
         grid_flattened = grid.reshape(-1)
-        
         # Features related to grid
         row_sums = np.sum(grid, axis=1)  # Sum of each row
         col_sums = np.sum(grid, axis=0)  # Sum of each column
@@ -104,7 +103,7 @@ class Game_2048NN:
         # Normalize features
         features = (features - np.mean(features, axis=0)) / np.std(features, axis=0)
         
-        nn_model.fit(features, rewards, epochs=100, batch_size=64, validation_split=0.1)
+        nn_model.fit(features, rewards, epochs=50, batch_size=64, validation_split=0.1)
         return nn_model
 
 
@@ -112,18 +111,20 @@ class Game_2048NN:
         total_score = 0
         total_max_tiles = []
         for i in range(self.test_games):
-            print(f"NEW IIIIIIIIIII LETS GOOOOO {i}")
+            print(f"NEW GAME: {i}")
             game = GameLogic()
             done = False
             while not done:
                 observations = self.generate_observations(game, 'l', game.done)  # Use a placeholder move
-                observations = np.array([observations])  # Ensure it's a 2D array with shape (1, 30)
-                observations = np.append(observations, np.array([0,0,0]))  # Make sure this doesn't change the shape unexpectedly
+                
+                # Reshape to ensure it's a 2D array with shape (1, 30)
+                observations = np.expand_dims(observations, axis=0)
+                observations = np.append(observations, np.array([[0, 0, 0]]), axis=1)
 
-                # Correctly reshape observations if necessary
-                if observations.shape[0] == 30:
-                    observations = np.reshape(observations, (1, 30))  # Ensure the shape is (1, 30)
-
+                # Ensure the shape is correct after appending
+                if observations.shape != (1, 31):
+                    observations = np.reshape(observations, (1, 30))
+                
                 predicted_rewards = nn_model.predict(observations)
                 action_index = np.argmax(predicted_rewards)  # Choose action with the highest predicted reward
 
@@ -147,9 +148,10 @@ class Game_2048NN:
             total_max_tiles.append(max_tile)
             print(total_max_tiles)
             total_score += game.get_score()
-    
+
         avg_score = total_score / self.test_games
         print(f"Average Score over {self.test_games} games: {avg_score}")
+
 
 
     def train(self):
@@ -160,4 +162,4 @@ class Game_2048NN:
 
 if __name__ == "__main__":
     game = Game_2048NN()
-    game.train()
+    game.train() 
