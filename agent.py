@@ -122,7 +122,7 @@ class Game_2048NN:
                 observations = np.append(observations, np.array([[0, 0, 0]]), axis=1)
 
                 # Ensure the shape is correct after appending
-                if observations.shape != (1, 31):
+                if observations.shape != (1, 30):
                     observations = np.reshape(observations, (1, 30))
                 
                 predicted_rewards = nn_model.predict(observations)
