@@ -1,6 +1,7 @@
 import pygame
 import math
 from game_logic import GameLogic, SCORE
+from agent import Game_2048NN
 import time
 pygame.init()
 

@@ -31,7 +31,7 @@ class GameLogic:
                     return False
         copy_grid = np.copy(grid)
         copy_grid = copy_grid.T
-        for col in grid:
+        for col in copy_grid:
             for i in range(len(col) - 2):
                 if col[i] == col[i + 1]:
                     return False
