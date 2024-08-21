@@ -37,16 +37,13 @@ class Game_2048NN:
                 observations = self.generate_observations(game, move, game.done)
                 observations = np.append(observations, reward[0:3])
                 print(len(observations))
-                # Format rewards as a vector with zeroes except for the action taken
                 rewards = np.zeros(4)
-                # Find index for the action based on the move
                 move_index = next((i for i, v in enumerate(self.vectors_and_keys) if v[0] == move), None)
                 if move_index is not None:
                     rewards[move_index] = reward[3]
                 else:
                     print(f"Move {move} not found in vectors_and_keys")
                 
-                # Add the observation and reward to the training data
                 population_data.append((observations, rewards))
                 
         # Convert the list of tuples to a NumPy array
@@ -60,10 +57,9 @@ class Game_2048NN:
     def generate_observations(self, game, move, done):
         grid = np.copy(game.grid)
         grid_flattened = grid.reshape(-1)
-        # Features related to grid
-        row_sums = np.sum(grid, axis=1)  # Sum of each row
-        col_sums = np.sum(grid, axis=0)  # Sum of each column
-        empty_count = np.sum(grid == 0)  # Number of empty cells
+        row_sums = np.sum(grid, axis=1)  
+        col_sums = np.sum(grid, axis=0)  
+        empty_count = np.sum(grid == 0) 
         
         # Features related to the move
         moves = ["l", "r", "u", "d"]
@@ -83,7 +79,6 @@ class Game_2048NN:
 
 
     def model(self):
-        # Define and return the neural network model
         model = Sequential([
             tf.keras.Input(shape=(30,)),
             Dense(64, activation='relu'),
@@ -100,7 +95,6 @@ class Game_2048NN:
         features = np.array([x[0] for x in training_data])
         rewards = np.array([x[1] for x in training_data])
         
-        # Normalize features
         features = (features - np.mean(features, axis=0)) / np.std(features, axis=0)
         
         nn_model.fit(features, rewards, epochs=50, batch_size=64, validation_split=0.1)
@@ -117,25 +111,21 @@ class Game_2048NN:
             while not done:
                 observations = self.generate_observations(game, 'l', game.done)  # Use a placeholder move
                 
-                # Reshape to ensure it's a 2D array with shape (1, 30)
                 observations = np.expand_dims(observations, axis=0)
                 observations = np.append(observations, np.array([[0, 0, 0]]), axis=1)
 
-                # Ensure the shape is correct after appending
                 if observations.shape != (1, 30):
                     observations = np.reshape(observations, (1, 30))
                 
                 predicted_rewards = nn_model.predict(observations)
-                action_index = np.argmax(predicted_rewards)  # Choose action with the highest predicted reward
+                action_index = np.argmax(predicted_rewards)  
 
-                # Generate moves based on predicted rewards
                 moves = ["l", "r", "u", "d"]
                 move = moves[action_index]
                 copy_grid = np.copy(game.grid)
                 reward = game.make_move(move)
 
                 if np.array_equal(copy_grid, game.grid):
-                    # Try alternative moves if the chosen move has no effect
                     available_moves = [m for m in moves if m != move]
                     for alternative_move in available_moves:
                         copy_grid = np.copy(game.grid)

@@ -106,20 +106,16 @@ def main(window):
             if event.type == pygame.QUIT:
                 run = False
 
-        # Get AI's move
+
         observations = ai.generate_observations(board, 'l', board.done)  # Dummy move, will be replaced
         
-        # Ensure observations is a 2D array with shape (1, number_of_features)
         if observations.ndim == 1:
             observations = np.expand_dims(observations, axis=0)
         
-        # Additional features to append
         additional_features = np.array([[0, 0, 0]])
         
-        # Ensure additional_features is a 2D array with shape (1, 3)
         additional_features = additional_features.reshape(1, -1)
 
-        # Concatenate features
         observations = np.concatenate((observations, additional_features), axis=1)
 
         # Ensure the shape is correct
