@@ -12,7 +12,7 @@ import io
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
 class Game_2048NN:
-    def __init__(self, initial_games=100, test_games=100, goal_steps=100, lr=1e-2):
+    def __init__(self, initial_games=100, test_games=2, goal_steps=100, lr=1e-2):
         self.initial_games = initial_games
         self.test_games = test_games
         self.goal_steps = goal_steps
