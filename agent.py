@@ -5,6 +5,8 @@ import random
 from random import randint
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LeakyReLU
+from tensorflow.keras.layers import BatchNormalization, Dropout
+
 import sys
 import io
 
@@ -84,11 +86,13 @@ class Game_2048NN:
     def model(self):
         # Define and return the neural network model
         model = Sequential([
-            tf.keras.Input(shape=(30,)),  # Input shape should match the feature size
-            Dense(15, activation= 'relu'),
-            Dense(5, activation= 'relu'),
-            Dense(4, activation='linear')  # Assuming 4 possible actions
+            tf.keras.Input(shape=(30,)),
+            Dense(64, activation='relu'),
+            Dense(32, activation='relu'),
+            Dense(16, activation='relu'),
+            Dense(4, activation='linear')
         ])
+
         model.compile(optimizer=tf.keras.optimizers.Adam(learning_rate=self.lr),
                       loss='mean_squared_error')
         return model
@@ -100,7 +104,7 @@ class Game_2048NN:
         # Normalize features
         features = (features - np.mean(features, axis=0)) / np.std(features, axis=0)
         
-        nn_model.fit(features, rewards, epochs=50, batch_size=64, validation_split=0.1)
+        nn_model.fit(features, rewards, epochs=100, batch_size=64, validation_split=0.1)
         return nn_model
 
 
