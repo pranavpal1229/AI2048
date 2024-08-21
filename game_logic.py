@@ -1,7 +1,7 @@
 import numpy as np
 import random 
 import collections
-
+import math 
 grid_size = 4
 SCORE = 0
 class GameLogic:

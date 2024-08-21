@@ -6,7 +6,7 @@ from random import randint
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, LeakyReLU
 from tensorflow.keras.layers import BatchNormalization, Dropout
-
+import math
 import sys
 import io
 

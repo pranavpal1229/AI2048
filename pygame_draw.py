@@ -2,6 +2,7 @@ import pygame
 import math
 from game_logic import GameLogic
 import time
+import random
 from agent import Game_2048NN
 import numpy as np
 # Initialize AI
